@@ -13,8 +13,6 @@ import (
 )
 
 const (
-	statusFileName = "protonvpn_status.conf"
-
 	protonvpnBin = "protonvpn"
 
 	statusWorking      = "working"
@@ -76,6 +74,10 @@ func readStatus() string {
 		} else {
 			panic("Something goes wrong reading ProtonVPN status file.")
 		}
+	}
+
+	if string(data) == "" {
+		setStatus(handleActionOutput(""))
 	}
 
 	return string(data)
@@ -191,9 +193,13 @@ func action(name string) {
 }
 
 func main() {
+	if len(os.Args) < 2 {
+		panic("You must provide ProtonVPN status path arguemnt.")
+	}
+
 	if checkBinary() {
 		// set ProtonVPN status file path
-		statusPath = os.TempDir() + "/" + statusFileName
+		statusPath = os.Args[1]
 
 		if utils.IsAppRunning("protonvpn") {
 			utils.ScratchpadShow("protonvpn")

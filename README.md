@@ -1,6 +1,6 @@
 # Bemenu Proton VPN
 
-Depends on bemenu and Proton VPN community script 
+Depends on bemenu and [Proton VPN community script](https://github.com/Rafficer/linux-cli-community)
 
 ## Usage in bemenu config file
 

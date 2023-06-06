@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	protonvpnBin = "protonvpn"
+	statusFileName = "protonvpn_status.conf"
 
-	statusPath = "/home/yves/.config/i3status/protonvpn_status.conf"
+	protonvpnBin = "protonvpn"
 
 	statusWorking      = "working"
 	statusConnected    = "connected"
@@ -30,6 +30,8 @@ type MenuItem struct {
 }
 
 var (
+	statusPath string
+
 	menuItems = []MenuItem{
 		{"Le plus rapide", "connect -f"},
 		{"Japon", "connect --cc jp"},
@@ -56,7 +58,25 @@ var (
 
 // readStatus function read Protonvpn current status from file /home/yves/.config/i3status/protonvpn_status.conf
 func readStatus() string {
-	data, _ := os.ReadFile(statusPath)
+	data, err := os.ReadFile(statusPath)
+
+	// when start, the ProtonVPN status file might not exist
+	// so we need to create it and set its status
+	if err != nil {
+		// if the file do not exist, create it and set initial status
+		if os.IsNotExist(err) {
+			if _, err = os.Create(statusPath); err != nil {
+				panic("Could not create ProtonVPN status file.")
+			}
+			// write ProtonVPN status to status file
+			setStatus(handleActionOutput(""))
+
+			// read again the newly created status
+			data, _ = os.ReadFile(statusPath)
+		} else {
+			panic("Something goes wrong reading ProtonVPN status file.")
+		}
+	}
 
 	return string(data)
 }
@@ -113,7 +133,7 @@ func handleActionOutput(output string) (string, string) {
 
 	matched, _ := regexp.MatchString(`Connected`, output)
 
-	if matched == true {
+	if matched {
 
 		re := regexp.MustCompile(`Connecting to (.*) via|Server:[[:space:]]*(.*)`)
 		matches := re.FindStringSubmatch(output)
@@ -133,13 +153,13 @@ func handleActionOutput(output string) (string, string) {
 
 	matched, _ = regexp.MatchString(`Disconnected|No connection found`, output)
 
-	if matched == true {
+	if matched {
 		return statusDisconnected, ""
 	}
 
 	matched, _ = regexp.MatchString(`error`, output)
 
-	if matched == true {
+	if matched {
 		return statusError, ""
 	}
 
@@ -171,7 +191,10 @@ func action(name string) {
 }
 
 func main() {
-	if checkBinary() == true {
+	if checkBinary() {
+		// set ProtonVPN status file path
+		statusPath = os.TempDir() + "/" + statusFileName
+
 		if utils.IsAppRunning("protonvpn") {
 			utils.ScratchpadShow("protonvpn")
 		} else {

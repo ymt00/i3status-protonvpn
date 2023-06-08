@@ -2,7 +2,7 @@
 
 Depends on bemenu and [Proton VPN community script](https://github.com/Rafficer/linux-cli-community)
 
-## Usage in bemenu config file
+## Usage in i3status-rs config file
 
 ```
 [[block]]

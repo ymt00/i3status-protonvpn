@@ -1,4 +1,4 @@
-// Integration of protonvpn python script for i3status bar for sway
+// depends on protonvpn community cli script
 // show a Bemenu for connection to servers (fastest, Japan, Netherland, US)
 // if already connected add Disconnect and Refresh to Bemenu
 package main
